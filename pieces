@@ -1,0 +1,140 @@
+// toString () will print all attributes of my class
+
+
+public static abstract class Piece {
+    protected Colour colour;
+
+    public Piece(Colour colour) {
+        this.colour = colour;
+    }
+
+    public Colour getColour() {
+        return colour;
+    }
+
+    public abstract boolean isValidMove(int initialRow, int initialColumn, int finalColumn,
+            int finalRow, int colDifference, int rowDifference, int absoluteRowDiff, Piece[][] board);
+
+    public abstract String toString();
+}
+
+public static class Pawn extends Piece {
+    public Pawn(Colour colour) {
+        super(colour);
+    }
+
+    @Override
+    public boolean isValidMove(int initialRow, int initialColumn, int finalColumn,
+            int finalRow, int colDifference, int rowDifference, int absoluteRowDiff, Piece[][] board) {
+        boolean validMove = true;
+
+        int direction = (colour == Colour.WHITE) ? 1 : -1;
+
+        if (colDifference == 0 && rowDifference == direction) {
+            validMove = true;
+        }
+
+        else if ((colDifference == 0) && (initialRow == 1 || initialRow == 6) &&
+                (rowDifference == 2 || rowDifference == -2) && (board[finalRow][finalColumn] == null)) {
+            validMove = true;
+
+        } else if ((colDifference == 1 && rowDifference == 1) && (board[finalRow][finalColumn] != null))
+            validMove = true;
+
+        else {
+            validMove = false;
+        }
+        return validMove;
+    }
+
+    public String toString() {
+        return colour == Colour.WHITE ? "P" : "p";
+    }
+
+}
+
+public static class Bishop extends Piece {
+    public Bishop(Colour colour) {
+        super(colour);
+    }
+
+    @Override
+    public boolean isValidMove(int initialRow, int initialColumn, int finalColumn,
+            int finalRow, int colDifference, int absoluteRowDiff, int rowDifference, Piece[][] board) {
+        return (absoluteRowDiff == colDifference);
+    }
+
+    public String toString() {
+        return colour == Colour.WHITE ? "B" : "b";
+    }
+}
+
+public static class Rook extends Piece {
+    public Rook(Colour colour) {
+        super(colour);
+    }
+
+    @Override
+    public boolean isValidMove(int initialRow, int initialColumn, int finalColumn, int finalRow,
+            int colDifference, int rowDifference, int absoluteRowDiff, Piece[][] board) {
+        return ((colDifference == 0) ^ (absoluteRowDiff == 0));
+    }
+
+    public String toString() {
+        return colour == Colour.WHITE ? "R" : "r";
+    }
+}
+
+public static class Knight extends Piece {
+    public Knight(Colour colour) {
+        super(colour);
+    }
+
+    @Override
+    public boolean isValidMove(int initialRow, int initialColumn, int finalColumn,
+            int finalRow, int colDifference, int rowDifference, int absoluteRowDiff, Piece[][] board) {
+
+        return ((colDifference == 1 && absoluteRowDiff == 2) || (colDifference == 2 && absoluteRowDiff == 1));
+
+    }
+
+    public String toString() {
+        return colour == Colour.WHITE ? "N" : "n";
+    }
+}
+
+public static class Queen extends Piece {
+    public Queen(Colour colour) {
+        super(colour);
+    }
+
+    @Override
+    public boolean isValidMove(int initialRow, int initialColumn, int finalColumn, int finalRow,
+            int colDifference, int rowDifference, int absoluteRowDiff, Piece[][] board) {
+        return true;
+    }
+
+    public String toString() {
+        return colour == Colour.WHITE ? "Q" : "q";
+    }
+}
+
+public static class King extends Piece {
+    public King(Colour colour) {
+        super(colour);
+    }
+
+    @Override
+    public boolean isValidMove(int initialRow, int initialColumn, int finalColumn, int finalRow,
+            int colDifference, int rowDifference, int absoluteRowDiff, Piece[][] board) {
+        boolean validKingMove = true;
+        if (absoluteRowDiff > 1 || colDifference > 1)
+            validKingMove = false;
+
+        return validKingMove;
+    }
+
+    public String toString() {
+        return colour == Colour.WHITE ? "K" : "k";
+    }
+}
