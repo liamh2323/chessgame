@@ -1,15 +1,22 @@
 // toString () will print all attributes of my class
 
+package ChessProject;
 
-public static abstract class Piece {
+public abstract class Piece {
     protected Colour colour;
+    protected int value;
 
-    public Piece(Colour colour) {
+    public Piece(Colour colour, int value) {
         this.colour = colour;
+        this.value = value;
     }
 
     public Colour getColour() {
         return colour;
+    }
+
+    public int getValue() {
+        return value;
     }
 
     public abstract boolean isValidMove(int initialRow, int initialColumn, int finalColumn,
@@ -18,9 +25,9 @@ public static abstract class Piece {
     public abstract String toString();
 }
 
-public static class Pawn extends Piece {
+class Pawn extends Piece {
     public Pawn(Colour colour) {
-        super(colour);
+        super(colour, 1);
     }
 
     @Override
@@ -53,9 +60,9 @@ public static class Pawn extends Piece {
 
 }
 
-public static class Bishop extends Piece {
+class Bishop extends Piece {
     public Bishop(Colour colour) {
-        super(colour);
+        super(colour, 3);
     }
 
     @Override
@@ -69,9 +76,9 @@ public static class Bishop extends Piece {
     }
 }
 
-public static class Rook extends Piece {
+class Rook extends Piece {
     public Rook(Colour colour) {
-        super(colour);
+        super(colour,5);
     }
 
     @Override
@@ -85,9 +92,9 @@ public static class Rook extends Piece {
     }
 }
 
-public static class Knight extends Piece {
+class Knight extends Piece {
     public Knight(Colour colour) {
-        super(colour);
+        super(colour,3);
     }
 
     @Override
@@ -103,9 +110,9 @@ public static class Knight extends Piece {
     }
 }
 
-public static class Queen extends Piece {
+class Queen extends Piece {
     public Queen(Colour colour) {
-        super(colour);
+        super(colour, 8);
     }
 
     @Override
@@ -119,9 +126,9 @@ public static class Queen extends Piece {
     }
 }
 
-public static class King extends Piece {
+class King extends Piece {
     public King(Colour colour) {
-        super(colour);
+        super(colour,100);
     }
 
     @Override
