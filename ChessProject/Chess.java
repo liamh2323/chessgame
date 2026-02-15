@@ -1,4 +1,7 @@
+package ChessProject;
+
 import java.util.Scanner;
+
 public class Chess {
 
     public enum Pieces {
@@ -10,9 +13,16 @@ public class Chess {
         KING,
     }
 
-    public enum Colour {
-        WHITE,
-        BLACK
+    public enum GameState {
+        CHECK,
+        CHECKMATE,
+        STALEMATE,
+        NORMAL
+    }
+
+    public enum whosMove {
+        WHITE_MOVED,
+        BLACK_MOVED
     }
 
     public static Piece[][] StartingBoard() {
@@ -96,17 +106,20 @@ public class Chess {
         return newBoard;
     }
 
-
     public static void main(String[] args) {
-        Pieces pieceBeingMoved = null;
+
+    
         Piece[][] board = new Piece[8][8];
         board = StartingBoard();
 
+        Piece pieceBeingMoved;
         int countOfMoves = 0;
         int whiteKingRow = 0;
         int whiteKingColumn = 4;
         int blackKingRow = 7;
         int blackKingColumn = 4;
+        int whiteScore;
+        int blackScore;
         boolean validMove = true;
         boolean squareIsFree = true;
         boolean moveIsACheck = false;
@@ -116,42 +129,6 @@ public class Chess {
         System.out.println("Enter your move in the format rowColumn -> rowColumn >");
         String move = input.nextLine();
         while (!move.equals("quit")) {
-
-            /*
-             * switch (move.charAt(0)) {
-             * case 'K':
-             * pieceBeingMoved = Pieces.KING;
-             * break;
-             * 
-             * case 'Q':
-             * pieceBeingMoved = Pieces.QUEEN;
-             * break;
-             * 
-             * case 'R':
-             * pieceBeingMoved = Pieces.ROOK;
-             * break;
-             * 
-             * case 'B':
-             * pieceBeingMoved = Pieces.BISHOP;
-             * break;
-             * 
-             * case 'N':
-             * pieceBeingMoved = Pieces.KNIGHT;
-             * break;
-             * 
-             * default:
-             * pieceBeingMoved = Pieces.PAWN;
-             * break;
-             * }
-             * 
-             * if (pieceBeingMoved == Pieces.PAWN){
-             * char column = move.charAt(0);
-             * int finalColumn = convertCharToChessNotation(column);
-             * int row = Character.getNumericValue(move.charAt(1));
-             * int finalRow = convertIntToChessNotation(row);
-             * 
-             * }
-             */
 
             char column = move.charAt(0);
             int row = Character.getNumericValue(move.charAt(1));
@@ -168,6 +145,9 @@ public class Chess {
             int rowDifference = (finalRow - initialRow);
             int absoluteRowDiff = Math.abs(rowDifference);
 
+            pieceBeingMoved = board[initialRow][initialColumn];
+            
+
             validMove = board[initialRow][initialColumn].isValidMove(initialRow, initialColumn, finalColumn, finalRow,
                     colDifference, rowDifference, absoluteRowDiff, board);
 
@@ -180,22 +160,35 @@ public class Chess {
              * System.out.println(rowDifference);
              */
 
+            moveIsACheck = Moves.kingBeingAttacked(finalColumn, finalRow, whiteKingColumn,
+                    whiteKingRow, blackKingColumn, blackKingRow, countOfMoves, board, 
+                    pieceBeingMoved, ((pieceBeingMoved.getColour() == Colour.WHITE) ? Colour.BLACK : Colour.WHITE));
+
             System.out.println(validMove);
+            System.out.println(moveIsACheck);
 
             if ((initialColumn == -1 || initialRow == -1) || (finalColumn == -1 ||
                     finalRow == -1)) {
                 validMove = false;
             }
 
-            squareIsFree = squareIsFree(finalColumn, finalRow, board);
+            squareIsFree = Moves.squareIsFree(finalColumn, finalRow, board);
 
-            if (!squareIsFree)
-                validMove = isValidCapture(finalColumn, finalRow, initialColumn, initialRow,
+            if (!squareIsFree) {
+                validMove = Moves.isValidCapture(finalColumn, finalRow, initialColumn, initialRow,
                         board);
+                if (countOfMoves % 2 == 0) {
+                    whiteScore = board[finalRow][finalColumn].getValue();
+                } else {
+                    blackScore = board[finalRow][finalColumn].getValue();
+                }
+            }
 
-            validMove = noObstruction(initialRow, initialColumn, finalColumn, finalRow, colDifference, rowDifference,
+            validMove = Moves.noObstruction(initialRow, initialColumn, finalColumn, finalRow, colDifference,
+                    rowDifference,
                     absoluteRowDiff, board);
 
+            whiteScore = 0;
             if (validMove) {
 
                 if (board[initialRow][initialColumn] instanceof King) {
