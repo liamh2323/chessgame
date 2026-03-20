@@ -151,19 +151,10 @@ public class Chess {
             validMove = board[initialRow][initialColumn].isValidMove(initialRow, initialColumn, finalColumn, finalRow,
                     colDifference, rowDifference, absoluteRowDiff, board);
 
-            /*
-             * System.out.println(initialColumn);
-             * System.out.println(initialRow);
-             * System.out.println(finalColumn);
-             * System.out.println(finalRow);
-             * System.out.println(colDifference);
-             * System.out.println(rowDifference);
-             */
-
-            moveIsACheck = Moves.kingBeingAttacked(finalColumn, finalRow, whiteKingColumn,
+            /*moveIsACheck = CheckInfo.kingBeingAttacked(finalColumn, finalRow, whiteKingColumn,
                     whiteKingRow, blackKingColumn, blackKingRow, countOfMoves, board, 
-                    pieceBeingMoved, ((pieceBeingMoved.getColour() == Colour.WHITE) ? Colour.BLACK : Colour.WHITE));
-
+                    pieceBeingMoved, ((pieceBeingMoved.getColour() == Colour.WHITE) ? Colour.BLACK : Colour.WHITE)).isInCheck();
+*/
             System.out.println(validMove);
             System.out.println(moveIsACheck);
 
@@ -192,12 +183,13 @@ public class Chess {
             if (validMove) {
 
                 if (board[initialRow][initialColumn] instanceof King) {
-                    if (countOfMoves % 2 == 0) {
+                    if (pieceBeingMoved.getColour() == Colour.WHITE) {
                         whiteKingColumn = finalColumn;
                         whiteKingRow = finalRow;
+                    } else {
+                        blackKingColumn = finalColumn;
+                        blackKingRow = finalRow;
                     }
-                    blackKingColumn = finalColumn;
-                    blackKingRow = finalRow;
                 }
 
                 board[finalRow][finalColumn] = board[initialRow][initialColumn];
@@ -205,12 +197,24 @@ public class Chess {
 
                 System.out.print(printBoard(board, countOfMoves));
 
+                boolean checkFor = Moves.kingBeingAttacked(finalColumn, finalRow, whiteKingColumn, whiteKingRow,
+                        blackKingColumn, blackKingRow, countOfMoves, board, pieceBeingMoved,
+                        (pieceBeingMoved.getColour() == Colour.WHITE ? Colour.BLACK : Colour.WHITE)).isInCheck();
+
+                System.out.println("Check: " + checkFor);
+
+                boolean mateFor = checkmate.isCheckmate(whiteKingColumn, whiteKingRow,
+                        blackKingColumn, blackKingRow, board,
+                        (pieceBeingMoved.getColour() == Colour.WHITE ? Colour.BLACK : Colour.WHITE));
+
+                System.out.println("Checkmate: " + mateFor);
+
                 System.out.println();
                 countOfMoves++;
                 System.out.println("Enter your next move >");
                 move = input.nextLine();
             } else {
-                System.out.println("error. invalid move retard.");
+                System.out.println("error. invalid move.");
                 System.out.println("Enter an actual move >");
                 move = input.nextLine();
             }

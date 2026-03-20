@@ -85,157 +85,81 @@ public class Moves {
         return true;
     }
 
-public static boolean kingBeingAttacked(int finalColumn, int finalRow, int
+    public static class CheckInfo {
+        private final boolean inCheck;
+        private final int[] attackerPosition;
+
+        public CheckInfo(boolean inCheck, int[] attackerPosition) {
+            this.inCheck = inCheck;
+            this.attackerPosition = attackerPosition;
+        }
+
+        public boolean isInCheck() {
+            return inCheck;
+        }
+
+        public int[] getAttackerPosition() {
+            return attackerPosition;
+        }
+    }
+
+    public static CheckInfo kingBeingAttacked(int finalColumn, int finalRow, int
      whiteKingColumn, int whiteKingRow, int blackKingColumn, int blackKingRow, 
      int countOfMoves, Piece[][] board, Piece pieceBeingMoved, Colour kingColour){
 
-    boolean[] allDirections = new boolean [8];
-     
-    int ringSize = -1;
-    Piece piece;
-    int kingRow = (kingColour == Colour.BLACK) ? blackKingRow : whiteKingRow;
-    int kingColumn = (kingColour == Colour.BLACK) ? blackKingColumn : whiteKingColumn;
-    Colour enemyColour = (kingColour == Colour.BLACK) ? Colour.WHITE : Colour.BLACK;
-    int pawnDiag1 = (enemyColour == Colour.WHITE) ? DIAG_TOUCHES : DIAG_ADAM;
-    int pawnDiag2 = (enemyColour == Colour.WHITE) ? DIAG_SANDLER : DIAG_CHILDREN;
-     
-     allDirections[0] = true;
-     allDirections[1] = true;
-     allDirections[2] = true;
-     allDirections[3] = true;
-     allDirections[4] = true;
-     allDirections[5] = true;
-     allDirections[6] = true;
-     allDirections[7] = true;
+        int kingRow = (kingColour == Colour.BLACK) ? blackKingRow : whiteKingRow;
+        int kingColumn = (kingColour == Colour.BLACK) ? blackKingColumn : whiteKingColumn;
+        Colour enemyColour = (kingColour == Colour.BLACK) ? Colour.WHITE : Colour.BLACK;
 
-    if(pieceBeingMoved instanceof Knight){
-        int KnightColDiff = Math.abs(finalColumn - kingColumn);
-        int KnightRowDiff = Math.abs(finalRow - kingRow);
-        if((KnightColDiff == 1 && KnightRowDiff == 2) || (KnightColDiff == 2 && KnightRowDiff == 1)){
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-     
-    while (!allFalse(allDirections)){
-
-        ringSize++;
-
-        if ((kingRow + ringSize) >= 7){
-            allDirections[POSITIVE_Y] = false;
-            allDirections[DIAG_ADAM] = false;
-            allDirections[DIAG_SANDLER] = false;
-        }
-        if ((kingRow - ringSize) <= 0){
-            allDirections[NEGATIVE_Y] = false;
-            allDirections[DIAG_TOUCHES] = false;
-            allDirections[DIAG_CHILDREN] = false;
-        }
-        if ((kingColumn - ringSize) <= 0){
-            allDirections[NEGATIVE_X] = false;
-            allDirections[DIAG_SANDLER] = false;
-            allDirections[DIAG_TOUCHES] = false;
-        }
-        if ((kingColumn + ringSize) >= 7){
-            allDirections[POSITIVE_X] = false;
-            allDirections[DIAG_ADAM] = false; 
-            allDirections[DIAG_CHILDREN] = false;
-        }
-
-        if(allDirections[NEGATIVE_X]){
-            piece = board[kingRow][kingColumn - ringSize];
-            if((piece instanceof Queen || piece instanceof Rook) && piece.getColour() == enemyColour){
-                return true;
-            }
-            else{
-                allDirections[NEGATIVE_X] = (piece == null);
+        // knight threats
+        int[][] knightMoves = {{-2,-1},{-2,1},{-1,-2},{-1,2},{1,-2},{1,2},{2,-1},{2,1}};
+        for (int[] km : knightMoves) {
+            int r = kingRow + km[0];
+            int c = kingColumn + km[1];
+            if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                Piece p = board[r][c];
+                if (p instanceof Knight && p.getColour() == enemyColour) {
+                    return new CheckInfo(true, new int[]{r, c});
+                }
             }
         }
 
-        if(allDirections[POSITIVE_X]){
-            piece = board[kingRow][kingColumn + ringSize];
-            if((piece instanceof Queen || piece instanceof Rook) && piece.getColour() == enemyColour){
-                return true;
-            }
-            else{
-                allDirections[POSITIVE_X] = (piece == null);
-            }
-        }
-
-        if(allDirections[NEGATIVE_Y]){
-            piece = board[kingRow - ringSize][kingColumn];
-            if((piece instanceof Queen || piece instanceof Rook) && piece.getColour() == enemyColour){
-                return true;
-            }
-            else{
-                allDirections[NEGATIVE_Y] = (piece == null);
+        // pawn threat: enemy pawns attack king square
+        int pawnDirection = (enemyColour == Colour.WHITE) ? 1 : -1;
+        int[] pawnAttackCols = {kingColumn - 1, kingColumn + 1};
+        for (int c : pawnAttackCols) {
+            int r = kingRow - pawnDirection; // from pawn perspective to king
+            if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                Piece p = board[r][c];
+                if (p instanceof Pawn && p.getColour() == enemyColour) {
+                    return new CheckInfo(true, new int[]{r, c});
+                }
             }
         }
 
-        if(allDirections[POSITIVE_Y]){
-            piece = board[kingRow + ringSize][kingColumn];
-            if((piece instanceof Queen || piece instanceof Rook) && piece.getColour() == enemyColour){
-                return true;
-            }
-            else{
-                allDirections[POSITIVE_Y] = (piece == null);
-            }
-        }
-
-        if(allDirections[DIAG_ADAM]){
-            piece = board[kingRow + ringSize][kingColumn + ringSize];
-            if((piece instanceof Bishop || piece instanceof Queen) && piece.getColour() == enemyColour){
-                return true;    
-            }
-            else if(piece instanceof Pawn && piece.getColour() == enemyColour && ringSize == 1 && DIAG_ADAM == pawnDiag1){
-                return true;
-            }
-            else{
-                allDirections[DIAG_ADAM] = (piece == null);
-            }
-        }
-
-        if(allDirections[DIAG_SANDLER]){
-            piece = board[kingRow - ringSize][kingColumn + ringSize];
-            if((piece instanceof Bishop || piece instanceof Queen) && piece.getColour() == enemyColour){
-                return true;
-            }
-            else if(piece instanceof Pawn && piece.getColour() == enemyColour && ringSize == 1 && DIAG_SANDLER == pawnDiag2){
-                return true;
-            }
-            else{
-                allDirections[DIAG_SANDLER] = (piece == null);
+        // straight and diagonal threats from sliding pieces
+        int[][] directions = {{0,1},{0,-1},{1,0},{-1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
+        for (int[] d : directions) {
+            int r = kingRow + d[0];
+            int c = kingColumn + d[1];
+            while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                Piece p = board[r][c];
+                if (p != null) {
+                    if (p.getColour() == enemyColour) {
+                        if ((d[0] == 0 || d[1] == 0) && (p instanceof Rook || p instanceof Queen)) {
+                            return new CheckInfo(true, new int[]{r, c});
+                        }
+                        if (Math.abs(d[0]) == Math.abs(d[1]) && (p instanceof Bishop || p instanceof Queen)) {
+                            return new CheckInfo(true, new int[]{r, c});
+                        }
+                    }
+                    break;
+                }
+                r += d[0];
+                c += d[1];
             }
         }
 
-        if(allDirections[DIAG_TOUCHES]){
-            piece = board[kingRow - ringSize][kingColumn - ringSize];
-            if((piece instanceof Bishop || piece instanceof Queen) && piece.getColour() == enemyColour){
-                return true;
-            }
-            else if(piece instanceof Pawn && piece.getColour() == enemyColour && ringSize == 1 && DIAG_TOUCHES == pawnDiag1){
-                return true;
-            }
-            else{
-                allDirections[DIAG_TOUCHES] = (piece == null);
-            }
-        }
-     
-        if(allDirections[DIAG_CHILDREN]){
-            piece = board[kingRow + ringSize][kingColumn - ringSize];
-            if((piece instanceof Bishop || piece instanceof Queen) && piece.getColour() == enemyColour){
-                return true;
-            }
-            else if(piece instanceof Pawn && piece.getColour() == enemyColour && ringSize == 1 && DIAG_CHILDREN == pawnDiag2){
-                return true;
-            }
-            else{
-                allDirections[DIAG_CHILDREN] = (piece == null);
-            }   
-        }
-    }
-    return false;
+        return new CheckInfo(false, null);
     }
 }
