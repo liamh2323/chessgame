@@ -1,5 +1,4 @@
-package ChessProject;
-
+package ChessProject; 
 import java.util.Scanner;
 
 public class Chess {
@@ -19,12 +18,7 @@ public class Chess {
         STALEMATE,
         NORMAL
     }
-
-    public enum whosMove {
-        WHITE_MOVED,
-        BLACK_MOVED
-    }
-
+    
     public static Piece[][] StartingBoard() {
 
         Piece[][] newBoard = new Piece[8][8];
@@ -108,7 +102,6 @@ public class Chess {
 
     public static void main(String[] args) {
 
-    
         Piece[][] board = new Piece[8][8];
         board = StartingBoard();
 
@@ -118,17 +111,18 @@ public class Chess {
         int whiteKingColumn = 4;
         int blackKingRow = 7;
         int blackKingColumn = 4;
-        int whiteScore;
-        int blackScore;
+        int whiteScore = 0;
+        int blackScore = 0;
         boolean validMove = true;
         boolean squareIsFree = true;
-        boolean moveIsACheck = false;
+        GameState gameState = GameState.NORMAL;
+    
 
         Scanner input = new Scanner(System.in);
         System.out.println("Welcome to chess");
         System.out.println("Enter your move in the format rowColumn -> rowColumn >");
         String move = input.nextLine();
-        while (!move.equals("quit")) {
+        while (gameState != GameState.CHECKMATE) {
 
             char column = move.charAt(0);
             int row = Character.getNumericValue(move.charAt(1));
@@ -151,13 +145,6 @@ public class Chess {
             validMove = board[initialRow][initialColumn].isValidMove(initialRow, initialColumn, finalColumn, finalRow,
                     colDifference, rowDifference, absoluteRowDiff, board);
 
-            /*moveIsACheck = CheckInfo.kingBeingAttacked(finalColumn, finalRow, whiteKingColumn,
-                    whiteKingRow, blackKingColumn, blackKingRow, countOfMoves, board, 
-                    pieceBeingMoved, ((pieceBeingMoved.getColour() == Colour.WHITE) ? Colour.BLACK : Colour.WHITE)).isInCheck();
-*/
-            System.out.println(validMove);
-            System.out.println(moveIsACheck);
-
             if ((initialColumn == -1 || initialRow == -1) || (finalColumn == -1 ||
                     finalRow == -1)) {
                 validMove = false;
@@ -179,7 +166,7 @@ public class Chess {
                     rowDifference,
                     absoluteRowDiff, board);
 
-            whiteScore = 0;
+            
             if (validMove) {
 
                 if (board[initialRow][initialColumn] instanceof King) {
@@ -200,14 +187,20 @@ public class Chess {
                 boolean checkFor = Moves.kingBeingAttacked(finalColumn, finalRow, whiteKingColumn, whiteKingRow,
                         blackKingColumn, blackKingRow, countOfMoves, board, pieceBeingMoved,
                         (pieceBeingMoved.getColour() == Colour.WHITE ? Colour.BLACK : Colour.WHITE)).isInCheck();
+                
+                if(checkFor) gameState = GameState.CHECK;
 
                 System.out.println("Check: " + checkFor);
 
-                boolean mateFor = checkmate.isCheckmate(whiteKingColumn, whiteKingRow,
-                        blackKingColumn, blackKingRow, board,
-                        (pieceBeingMoved.getColour() == Colour.WHITE ? Colour.BLACK : Colour.WHITE));
+                if(gameState == GameState.CHECK){
 
-                System.out.println("Checkmate: " + mateFor);
+                    boolean mateFor = checkmate.isCheckmate(whiteKingColumn, whiteKingRow,
+                            blackKingColumn, blackKingRow, board,
+                            (pieceBeingMoved.getColour() == Colour.WHITE ? Colour.BLACK : Colour.WHITE));
+    
+                    System.out.println("Checkmate: " + mateFor);
+                    gameState = GameState.CHECKMATE;
+                }
 
                 System.out.println();
                 countOfMoves++;
@@ -219,6 +212,10 @@ public class Chess {
                 move = input.nextLine();
             }
         }
+        System.out.println((countOfMoves % 2 == 0) ? "White" : "Black" + " won !!!");
+        System.out.println("White Score: " + whiteScore);
+        System.out.println("Black Score:" + blackScore);
+
 
         input.close();
     }
